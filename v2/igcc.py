@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python
 
 # igcc - a read-eval-print loop for C/C++ programmers
 #
@@ -19,8 +19,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-import libigcc3.run
+import libigcc.run
 
 if __name__ == "__main__":
-	libigcc3.run.run()
+	libigcc.run.run()
 

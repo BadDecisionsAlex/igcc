@@ -1,5 +1,3 @@
-#!/usr/bin/env python3.7
-
 # igcc - a read-eval-print loop for C/C++ programmers
 #
 # Copyright (C) 2009 Andy Balaam
@@ -19,8 +17,27 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-import libigcc.run
+file_boilerplate = """#include <cstdio>
+#include <iostream>
+#include <string>
+$user_includes
+using namespace std;
 
-if __name__ == "__main__":
-	libigcc.run.run()
+$user_functions
+
+int main()
+{
+	$user_commands
+
+	return 0;
+}
+"""
+
+
+def get_full_source( runner ):
+	return ( file_boilerplate
+		.replace( "$user_functions", runner.get_user_functions_string() )
+		.replace( "$user_commands", runner.get_user_commands_string() )
+		.replace( "$user_includes", runner.get_user_includes_string() )
+		)
 
