@@ -18,6 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+import os
 import functools
 
 import source_code
@@ -40,15 +41,17 @@ def dot_q( runner ):
 
 def dot_l( runner ):
     included = runner.get_user_includes_string()
-    included = included.join( [s for s in included.splitlines() if s] )
+    included = os.linesep.join( [s for s in included.splitlines() if s] )
     if ( len( included ) > 0 ):
         print( included, '\n' )
+
     functions = runner.get_user_functions_string()
-    functions = functions.join( [s for s in functions.splitlines() if s] )
+    functions = os.linesep.join( [s for s in functions.splitlines() if s] )
     if ( len( functions ) > 0 ):
         print( functions, '\n' )
+
     commands = runner.get_user_commands_string()
-    commands = commands.join( [s for s in commands.splitlines() if s] )
+    commands = os.linesep.join( [s for s in commands.splitlines() if s] )
     if ( len( commands ) > 0 ):
         print( commands, '\n' )
     return False, False
