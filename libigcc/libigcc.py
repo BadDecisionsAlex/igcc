@@ -137,8 +137,8 @@ def print_welcome():
     print( f"""\
 
 {Fore.GREEN}IGCC {VERSION}{Style.RESET_ALL}{Style.BRIGHT}{Fore.BLACK}
-Released under GNU GPL version 2 or later, with NO WARRANTY.
-Type ".h" for help.
+Released under GNU GPL version 2 or later, with NO WARRANTY.{Style.RESET_ALL}
+Type '.h' for help.
 """ )
 
 

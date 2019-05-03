@@ -19,9 +19,9 @@
 # MA 02110-1301, USA.
 
 import subprocess
-from pygmentize import highlight
-from pygmentize.lexers.c_cpp import CLexer
-from pygmentize.formatters import Terminal256Formatter
+from pygments import highlight
+from pygments.lexers.c_cpp import CLexer
+from pygments.formatters import Terminal256Formatter
 
 file_boilerplate = ( """\
 #include <stdlib.h>
@@ -74,9 +74,9 @@ def format_code( source_code ):
 
 def get_full_source( runner ):
     with_replacements = ( file_boilerplate
-      .reaplce( "/* __IGCC_ENTRY__ */", igcc_closure )
+      .replace( "/* __IGCC_ENTRY__ */", igcc_closure )
       .replace( "/* __IGCC_FUNCTIONS__ */", runner.get_user_functions_string() )
       .replace( "/* __IGCC_COMMANDS__ */", runner.get_user_commands_string() )
       .replace( "/* __IGCC_INCLUDES__ */", runner.get_user_includes_string() )
       )
-    return color_code( format_code( with_replacements ) )
+    return format_code( with_replacements )

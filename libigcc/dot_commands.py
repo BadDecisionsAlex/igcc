@@ -40,24 +40,25 @@ def dot_q( runner ):
     raise IGCCQuitException()
 
 def dot_l( runner ):
+    print()
     included = runner.get_user_includes_string()
     included = os.linesep.join( [s for s in included.splitlines() if s] )
     if ( len( included ) > 0 ):
-        print( included, '\n' )
+        print( color_code( included ), '\n' )
 
     functions = runner.get_user_functions_string()
     functions = os.linesep.join( [s for s in functions.splitlines() if s] )
     if ( len( functions ) > 0 ):
-        print( functions, '\n' )
+        print( color_code( functions ), '\n' )
 
     commands = runner.get_user_commands_string()
     commands = os.linesep.join( [s for s in commands.splitlines() if s] )
     if ( len( commands ) > 0 ):
-        print( commands, '\n' )
+        print( color_code( commands ), '\n' )
     return False, False
 
 def dot_L( runner ):
-    print( source_code.get_full_source( runner ) )
+    print( '\n' + color_code( get_full_source( runner ) ) )
     return False, False
 
 def dot_n( runner ):
