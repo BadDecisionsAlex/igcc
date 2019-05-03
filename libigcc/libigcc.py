@@ -42,7 +42,7 @@ prompt = Fore.YELLOW + "> " + Style.RESET_ALL
 compiler_command = ( "gcc", "-x", "c", "--std=gnu11", "-o", "$outfile", "-",
     "$include_dirs", "$lib_dirs", "$libs" )
 
-compiler_version = ( "g++", "--version" )
+compiler_version = ( "gcc", "--version" )
 
 include_dir_command = ( "-I$cmd", )
 lib_dir_command = ( "-L$cmd", )
