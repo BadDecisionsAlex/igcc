@@ -138,7 +138,7 @@ def print_welcome():
 
 {Fore.GREEN}IGCC {VERSION}{Style.RESET_ALL}{Style.BRIGHT}{Fore.BLACK}
 Released under GNU GPL version 2 or later, with NO WARRANTY.{Style.RESET_ALL}
-Type '.h' for help.
+Type ':h' for help.
 """ )
 
 
@@ -190,14 +190,21 @@ class Runner:
         subs_compiler_command = get_compiler_command(
             self.options, self.exefilename )
 
+
         inp = 1
         while inp is not None:
-            inp = read_line()
+            if len( self.options.eval ) > 0:
+                inp = self.options.eval.pop()
+            elif self.options.interactive:
+                inp = read_line()
+            else:
+                inp = None
+
             if inp is not None:
 
                 col_inp, run_cmp = (
                     process( inp, self ) )
-                if self.functions_paste and inp.strip() != '.f':
+                if self.functions_paste and inp.strip() != ':f':
                     self.user_functions.append(inp)
                 elif col_inp:
                     if self.input_num < len( self.user_input ):
@@ -214,7 +221,7 @@ class Runner:
                         subs_compiler_command, self )
 
                     if self.compile_error is not None:
-                        print( '[Compile error - type .e to see it.]' )
+                        print( "[Compile error - type ':e' to see it.]" )
                     else:
                         stdoutdata, stderrdata = run_exe( self.exefilename )
                         stdoutdata = stdoutdata.decode( 'utf-8' )
@@ -266,12 +273,15 @@ class Runner:
     def get_user_commands( self ):
         return [ a.inp for a in filter(
             lambda a: a.typ == UserInput.COMMAND,
-            self.get_user_input() ) ]
+            self.get_user_input() ) ] + self.options.eval;
 
     def get_user_includes( self ):
         return [ a.inp for a in filter(
             lambda a: a.typ == UserInput.INCLUDE,
-            self.get_user_input() ) ]
+            self.get_user_input() ) ] + list( map(
+	    lambda i: "#include" + ('"' if i[0] is not '<' else '') +
+	      i + ('"' if i[0] is not '<' else ''),
+              self.options.inline_includes ) )
 
     def get_user_functions_string( self ):
         return "\n".join( self.get_user_functions() ) + "\n"
@@ -283,22 +293,40 @@ class Runner:
         return "\n".join( self.get_user_includes() ) + "\n"
 
 def parse_args( argv ):
+
     parser = OptionParser( version="igcc " + VERSION )
             
     parser.add_option( "-I", "", dest="INCLUDE", action="append",
         help = "Add INCLUDE to the list of directories to " +
             "be searched for header files." )
+
     parser.add_option( "-L", "", dest="LIBDIR", action="append",
         help = "Add LIBDIR to the list of directories to " +
             "be searched for library files." )
+
     parser.add_option( "-l", "", dest="LIB", action="append",
         help = "Search the library LIB when linking." )
+
+    parser.add_option( "-f", "--file-include", dest="inline_includes",
+	action="append", metavar="FILE", default=[],
+        help = "Add files to scope using `#include ARG`." )
+
+    parser.add_option( "-e", "--eval", dest="eval", action="append",
+	metavar="EXPR", default=[],
+        help = "Evaluate an expression and print it's result over STDOUT." )
+
+    parser.add_option( "-i", "--force-interactive", dest="interactive",
+        action="store_true", default=False,
+	help = "(For use with '-e') Goto REPL afer `eval`. (Cancels STDOUT.)" )
         
     (options, args) = parser.parse_args( argv )
 
     if len( args ) > 0:
         parser.error( "Unrecognised arguments :" +
             " ".join( [ arg for arg in args ] ) )
+
+    if len( options.eval ) == 0:
+        options.interactive = True
 
     return options
 
@@ -316,14 +344,18 @@ def run( outputfile = sys.stdout, inputfile = None, print_welc = True,
             options = parse_args( argv )
 
             exefilename = get_temporary_file_name()
+            
             ret = "normal"
-            if print_welc:
+            if print_welc and options.interactive:
                 print_welcome()
 
             if os.path.isfile(history_file):
                 readline.read_history_file(history_file)
             else:
                 open( history_file, 'a+' ).close()
+
+            options.eval.reverse()
+            options.inline_includes.reverse()
 
             Runner( options, inputfile, exefilename ).do_run()
 

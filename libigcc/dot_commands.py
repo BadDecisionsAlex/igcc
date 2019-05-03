@@ -24,6 +24,7 @@ import functools
 from .source_code import *
 from .copying import *
 from .version import *
+from colorama import Fore, Style
 
 class IGCCQuitException( BaseException ):
     pass
@@ -81,7 +82,7 @@ def dot_f( runner ):
     runner.functions_paste = not runner.functions_paste
     print(
         'Functions paste mode is ' +
-        ( 'ON: Enter \".f\" again to return to return to normal editing.'
+        ( 'ON: Enter \":f\" again to return to return to normal editing.'
           if runner.functions_paste else 'OFF' ) + '\n' )
     runner.paste = False
     return False, False 
@@ -90,7 +91,7 @@ def dot_p( runner ):
     runner.paste = not runner.paste
     print(
         'Paste mode is ' +
-        ( 'ON: Enter \".p\" again to return to return to normal editing.'
+        ( 'ON: Enter \":p\" again to return to return to normal editing.'
           if runner.paste else 'OFF' ) + '\n' )
 
     runner.functions_paste = False
@@ -125,32 +126,36 @@ def dot_w( runner ):
 
 # TODO: consider using .n with argument instead of .N
 dot_commands = {
-    ".c" : ( "Show copying information", dot_c ),
-    ".e" : ( "Show the last compile errors/warnings", dot_e ),
-    ".h" : ( "Show this help message", None ),
-    ".q" : ( "Quit", dot_q ),
-    ".l" : ( "List the code you have entered", dot_l ),
-    ".L" : ( "List the whole program as given to the compiler", dot_L ),
-    ".n" : ( "Clear all entered commands ('new')", dot_n ),
-    ".N" : ( "Clear all entered commands including user functions ('New')",
+    ":c" : ( "Show copying information", dot_c ),
+    ":e" : ( "Show the last compile errors/warnings", dot_e ),
+    ":h" : ( "Show this help message", None ),
+    ":q" : ( "Quit", dot_q ),
+    ":l" : ( "List the code you have entered", dot_l ),
+    ":L" : ( "List the whole program as given to the compiler", dot_L ),
+    ":n" : ( "Clear all entered commands ('new')", dot_n ),
+    ":N" : ( "Clear all entered commands including user functions ('New')",
       dot_N ),
-    ".r" : ( "Redo undone command", dot_r ),
-    ".u" : ( "Undo previous command", dot_u ),
-    ".p" : ( "Toggle paste mode: useful for multiline snippets", dot_p ),
-    ".f" : ( "Toggle functions paste mode", dot_f ),
-    ".v" : ( "Show igcc and compiler version information", dot_v ),
-    ".w" : ( "Show warranty information", dot_w ),
+    ":r" : ( "Redo undone command", dot_r ),
+    ":u" : ( "Undo previous command", dot_u ),
+    ":p" : ( "Toggle paste mode: useful for multiline snippets", dot_p ),
+    ":f" : ( "Toggle functions paste mode", dot_f ),
+    ":v" : ( "Show igcc and compiler version information", dot_v ),
+    ":w" : ( "Show warranty information", dot_w ),
     }
 
 def dot_h( runner ):
     for cmd in sorted( list(
       dot_commands.keys() ),
       key=lambda s: s.lower() ):
-          print( cmd, dot_commands[cmd][0] )
+          print(
+            f"{Fore.CYAN}",
+            cmd,
+            f"{Style.RESET_ALL}\t",
+            dot_commands[cmd][0] )
     return False, False
 
 def process( inp, runner ):
-    if inp == ".h":
+    if inp == ":h":
         return dot_h( runner )
 
     for cmd in sorted( dot_commands.keys() ):
