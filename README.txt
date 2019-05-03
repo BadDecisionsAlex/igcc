@@ -1,175 +1,41 @@
-Interactive GCC
-===============
+This is a fork of @StarlitGhost 's `igcc` program.
 
-Interactive GCC (igcc) is a read-eval-print loop (REPL) for C/C++ programmers.
-
-It can be used like this:
-
- $ ./igcc 
- g++> int a = 5;
- g++> a += 2;
- g++> cout << a << endl;
- 7
- g++> --a;
- g++> cout << a << endl;
- 6
- g++> 
-
-It is possible to include header files you need like this:
-
- $ ./igcc 
- g++> #include <vector>
- g++> vector<int> myvec;
- g++> myvec.push_back( 17 );
- g++> printf( "%d\n", myvec.size() );
- 1
- g++> myvec.push_back( 21 );
- g++> printf( "%d\n", myvec.size() );
- 2
- g++> 
-
-It is possible to include your own functions using '.f':
-
-g++> .f
-Functions paste mode is ON: Enter ".f" again to return to return to normal editing.
-
-g++> int lastIndexOf(char *str, char c) {
-g++>   int ind = -1;
-g++>  for (int i=strlen(b)-1;i>=0;i--) {
-g++>   if (b[i] == c) {
-g++>     ind = i;
-g++>     break;
-g++>   }
-g++>  }
-g++>  return ind;
-g++> }
-g++> .f
-Functions paste mode is OFF
-
-You can use '.p' to enter "Paste" mode to enter multi line snippets :
-
-g++> .p
-Paste mode is ON: Enter ".p" again to return to return to normal editing.
-
-g++> char c = '_';
-g++> char *a = (char *)malloc(80);
-g++> char b[] = "a_another_word_there_last";
-g++> strcpy(a, b[lastIndexOf('_'));
-g++> puts(a);
-g++> .p
-Paste mode is OFF
-
-[Compile error - type .e to see it.]
-
-
-Compile errors can be tolerated until the code works:
-
- $ ./igcc
- g++> #include <map>
- g++> map<string,int> hits;
- g++> hits["foo"] = 12;
- g++> hits["bar"] = 15;
- g++> for( map<string,int>::iterator it = hits.begin(); it != hits.end(); ++it )
- [Compile error - type .e to see it.]
- g++> {
- [Compile error - type .e to see it.]
- g++> 	cout << it->first << " " << it->second << endl;
- [Compile error - type .e to see it.]
- g++> }
- bar 15
- foo 12
- g++> 
-
-Extra include directories can be supplied:
-
- $ ./igcc -Itest/cpp -Itest/cpp2
- g++> #include "hello.h"
- g++> hello();
- Hello, 
- g++> #include "world.h"
- g++> world();
- world!
- g++> 
-
-Libs can be linked:
-
- $ ./igcc -lm
- g++> #include "math.h"
- g++> cout << pow( 3, 3 ) << endl; // Actually a bad example since libm.a is already linked in C++
- 27
- g++> 
-
-Your own libs can be linked too:
-
- $ ./igcc -Itest/cpp -Ltest/cpp -lmylib
- g++> #include "mylib.h"
- g++> defined_in_cpp();
- defined_in_cpp saying hello.
- g++> 
-
-The cstdio, iostream and string headers are automatically included, and the std namespace is automatically in scope.
-
-Downloading and using
----------------------
-
-Download the IGCC tarball from the Sourceforge download area:
-
-https://sourceforge.net/projects/igcc/files/
-
-Untar it like so:
-
- tar -xjf igcc-0.1.tar.bz2
-
-And then start the program like this:
-
- cd igcc-0.1
- ./igcc
-
-Then type the C++ code you want to execute. It will be compiled with GCC and the results (if any) will be displayed.
-
-Type .h to see some (minimal) help.
-
-Developing
-----------
-
-IGCC is a small python wrapper around GCC.
-
-Check out the code here:
-
- git clone git://igcc.git.sourceforge.net/gitroot/igcc/igcc
-
-Or browse the source here:
-
-http://igcc.git.sourceforge.net/git/gitweb.cgi?p=igcc/igcc;a=tree
-
-Links
+Here are the notable changes I have made:
+1. The entire project was migrated to Python3
+2. C++ was swapped for C.
+   * There are minor but notable differences between the languages that made this more
+     suitable for my purposes.
+   * Standard has been set to `gnu11` by default.
+3. A list of `#include` files can be created through CLI params.
+   * This makes the tool very suitable for rolling into a makefile to enter a REPL
+     environment with an existing project.
+4. A list of C expressions may be created with CLI params.
+   * This allows you to quickly test some line of C code without any real overhead.
+     Ex: `igcc -e 'printf( "%d", ( 1 << 43 ) & 420 )';`
+   * By default `igcc` will evaluate the expression list and immediately exit.
+     The `-i` flag may be added to force an interactive session when `-e` is also present.
+5. The regex used to place `igcc` code was modified, allowing these hooks to be placed
+   inside of comments.
+   * This allows you to load an existing project and hook into your codebase with fine
+     placement of functions, expressions, and includes.
+   * A single unified hook was added so that a user only needs to add 1 line if they do
+     not desire more fine grained control.
+6. Color was added throughout the REPL using the `colorama` module, and `uncrustify` was
+   added to reformat the generated code.
+   * NOTE: I hard coded paths for my `uncrustify` config. On the off chance that you want
+     to use this code; you will want to change that path.
+     (Unless I fix it and then totally forget to update this README)
+    
+    
+TODO
 -----
 
-IGCC home page:
-http://www.artificialworlds.net/wiki/IGCC/IGCC
-
-IGCC Sourceforge page:
-http://sourceforge.net/projects/igcc/
-
-Andy Balaam's home page:
-http://www.artificialworlds.net
-
-Andy Balaam's blog:
-http://www.artificialworlds.net/blog
-
-Contact
--------
-
-Andy Balaam may be contacted on axis3x3 at users dot sourceforge dot net
-
-Copyright
----------
-
-IGCC is Copyright (C) 2009 Andy Balaam
-
-IGCC is Free Software released under the terms of the GNU General Public License version 2 or later.
-
-IGCC comes with NO WARRANTY.
-
-See the file COPYING for more information.
-
+1. Fix history file.
+2. Implicitly add missing ';' at end of REPL.
+3. Automatically enter "paste" mode if an open syntax block is unclosed.
+   (braces, parens, brackets, strings)
+4. Automatically print RHS expression's evaluated result using C11's `_Generic`.
+   * 99% of the time that I write a line I immediately want to print it. This should
+     just happen automatically. (Perhaps with a 1 character symbol?)
+   * There are a million C syntax parsers. The one from K&R is actually all I need to
+     detect this.
