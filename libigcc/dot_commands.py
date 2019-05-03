@@ -21,9 +21,9 @@
 import os
 import functools
 
-import source_code
-import copying
-import version
+from .source_code import *
+from .copying import *
+from .version import *
 
 class IGCCQuitException( BaseException ):
     pass
@@ -65,7 +65,7 @@ def dot_n( runner ):
     while runner.undo() is not None:
         undone_lines += 1
     if undone_lines > 0:
-        print( "[Undone '{}' lines.]".format( undone_lines ) )
+        print( f"[Undone '{undone_lines}' lines.]" )
     else:
         print( '[Nothing to undo.]' )
     return False, False
@@ -98,7 +98,7 @@ def dot_p( runner ):
 def dot_r( runner ):
     redone_line = runner.redo()
     if redone_line is not None:
-        print( "[Redone '{}'.]".format( redone_line ) )
+        print( f"[Redone '{redone_line}'.]" )
         return False, True
     else:
         print( '[Nothing to redo.]' )
@@ -108,13 +108,13 @@ def dot_r( runner ):
 def dot_u( runner ):
     undone_line = runner.undo()
     if undone_line is not None:
-        print( "[Undone '{undone_line}'.]" )
+        print( f"[Undone '{undone_line}'.]" )
     else:
         print( "[Nothing to undo.]" )
     return False, False
 
 def dot_v( runner ):
-    print( 'igcc {}'.format( version.VERSION ) )
+    print( f'igcc {VERSION}' )
     print( runner.version() )
     return False, False
 

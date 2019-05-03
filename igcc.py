@@ -19,8 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-import libigcc.run
+__author__ = 'Growpotkin'
 
-if __name__ == "__main__":
-	libigcc.run.run()
+from libigcc.libigcc import run
 
+if __name__ == '__main__':
+    run()

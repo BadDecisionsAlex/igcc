@@ -26,19 +26,22 @@ import readline
 import subprocess
 import sys
 import tempfile
+from colorama import Fore, Style
 from optparse import OptionParser
 
-import source_code
-import dot_commands
-import version
+from .source_code import *
+from .dot_commands import *
+from .version import *
 
 # --------------
 
 # One day these will be in a config file
 
-prompt = "> "
-compiler_command = ( "g++", "-x", "c++", "-o", "$outfile", "-",
+prompt = Fore.YELLOW + "> " + Style.RESET_ALL
+
+compiler_command = ( "gcc", "-x", "c", "--std=gnu11", "-o", "$outfile", "-",
     "$include_dirs", "$lib_dirs", "$libs" )
+
 compiler_version = ( "g++", "--version" )
 
 include_dir_command = ( "-I$cmd", )
@@ -105,7 +108,7 @@ def run_compile( subs_compiler_command, runner ):
         stdin = subprocess.PIPE, stderr = subprocess.PIPE )
 
     stdoutdata, stderrdata = compile_process.communicate(
-        source_code.get_full_source( runner ).encode( 'utf-8') )
+        get_full_source( runner ).encode( 'utf-8') )
 
     if compile_process.returncode == 0:
         return None
@@ -131,10 +134,12 @@ def get_compiler_version():
         compiler_version ).decode( 'utf-8' ).strip().split( '\n' )[0]
 
 def print_welcome():
-    print('''igcc $version
+    print( f"""\
+
+{Fore.GREEN}IGCC {VERSION}{Style.RESET_ALL}{Style.BRIGHT}{Fore.BLACK}
 Released under GNU GPL version 2 or later, with NO WARRANTY.
 Type ".h" for help.
-'''.replace( "$version", version.VERSION ))
+""" )
 
 
 class UserInput:
@@ -191,7 +196,7 @@ class Runner:
             if inp is not None:
 
                 col_inp, run_cmp = (
-                    dot_commands.process( inp, self ) )
+                    process( inp, self ) )
                 if self.functions_paste and inp.strip() != '.f':
                     self.user_functions.append(inp)
                 elif col_inp:
@@ -278,7 +283,7 @@ class Runner:
         return "\n".join( self.get_user_includes() ) + "\n"
 
 def parse_args( argv ):
-    parser = OptionParser( version="igcc " + version.VERSION )
+    parser = OptionParser( version="igcc " + VERSION )
             
     parser.add_option( "-I", "", dest="INCLUDE", action="append",
         help = "Add INCLUDE to the list of directories to " +
@@ -322,7 +327,7 @@ def run( outputfile = sys.stdout, inputfile = None, print_welc = True,
 
             Runner( options, inputfile, exefilename ).do_run()
 
-        except dot_commands.IGCCQuitException:
+        except IGCCQuitException:
             readline.set_history_length( history_size )
             readline.write_history_file( history_file )
 

@@ -19,20 +19,43 @@
 # MA 02110-1301, USA.
 
 import subprocess
+from pygmentize import highlight
+from pygmentize.lexers.c_cpp import CLexer
+from pygmentize.formatters import Terminal256Formatter
 
-file_boilerplate = ("""\
+file_boilerplate = ( """\
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-/* $user_includes */
-/* $user_functions */
+/* __IGCC_INCLUDES__ */
+/* __IGCC_FUNCTIONS__ */
 int
 main( void )
 {
-    /* $user_commands */
+    /* __IGCC_COMMANDS__ */
     return 0;
 }
 """ )
+# To be inserted inside of an existing function
+igcc_closure = ( """\
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+/* __IGCC_INCLUDES__ */
+/* __IGCC_FUNCTIONS__ */
+/* __IGCC_COMMANDS__ */
+""" )
+
+# ['default', 'emacs', 'friendly', 'colorful', 'autumn', 'murphy', 'manni',
+#  'monokai', 'perldoc', 'pastie', 'borland', 'trac', 'native', 'fruity',
+#  'bw', 'vim', 'vs', 'tango', 'rrt', 'xcode', 'igor', 'paraiso-light',
+#  'paraiso-dark', 'lovelace', 'algol', 'algol_nu', 'arduino', 'rainbow_dash',
+#  'abap']
+def color_code( source_code ):
+    return highlight(
+      source_code, CLexer(),
+      Terminal256Formatter( style='trac' )
+      )
 
 
 def format_code( source_code ):
@@ -51,8 +74,9 @@ def format_code( source_code ):
 
 def get_full_source( runner ):
     with_replacements = ( file_boilerplate
-      .replace( "/* $user_functions */", runner.get_user_functions_string() )
-      .replace( "/* $user_commands */", runner.get_user_commands_string() )
-      .replace( "/* $user_includes */", runner.get_user_includes_string() )
+      .reaplce( "/* __IGCC_ENTRY__ */", igcc_closure )
+      .replace( "/* __IGCC_FUNCTIONS__ */", runner.get_user_functions_string() )
+      .replace( "/* __IGCC_COMMANDS__ */", runner.get_user_commands_string() )
+      .replace( "/* __IGCC_INCLUDES__ */", runner.get_user_includes_string() )
       )
-    return format_code( with_replacements )
+    return color_code( format_code( with_replacements ) )
