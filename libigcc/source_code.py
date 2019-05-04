@@ -36,6 +36,7 @@ main( void )
     return 0;
 }
 """ )
+
 # To be inserted inside of an existing function
 igcc_closure = ( """\
 #include <stdlib.h>
@@ -58,9 +59,26 @@ def color_code( source_code ):
       )
 
 
+# Fill your preferred formatting command here.
 def format_code( source_code ):
-    format_process = subprocess.Popen(
-      ['uncrustify', '-l', 'c', '-q', '-c', '/home/camus/.uncrustify.cfg'],
+    from distutils.spawn import find_executable
+    from getpass import getuser
+    from os import environ
+    from os.path import isfile
+
+    # Try to detect a suitable formatting program.
+    if find_executable('uncrustify') is not None:
+        fmt_cmd = ['uncrustify', '-l', 'c', '-q']
+        # Detect if the user has an uncrustify config
+        cfg_path = environ['HOME'] + '/.uncrustify.cfg'
+        if isfile( cfg_path ):
+            fmt_cmd += ['-c', cfg_path]
+    elif find_executable('indent') is not None:
+        fmt_cmd = ['indent']
+    else: # Give up
+        return source_code
+
+    format_process = subprocess.Popen( fmt_cmd,
       stdin = subprocess.PIPE, stdout = subprocess.PIPE )
 
     stdoutdata, stderrdata = format_process.communicate(

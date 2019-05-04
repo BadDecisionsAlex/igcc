@@ -22,11 +22,11 @@ Here are the notable changes I have made:
      not desire more fine grained control.
 6. Color was added throughout the REPL using the `colorama` module, and `uncrustify` was
    added to reformat the generated code.
-   * NOTE: I hard coded paths for my `uncrustify` config. On the off chance that you want
-     to use this code; you will want to change that path.
-     (Unless I fix it and then totally forget to update this README)
-    
-    
+   * `uncrustify` will be the first choice by default, and a config will be 
+     loaded from `~/.uncrustify.cfg` if it exists. Next `indent` will be used,
+     after that it will give up.
+
+
 TODO
 -----
 
@@ -39,3 +39,4 @@ TODO
      just happen automatically. (Perhaps with a 1 character symbol?)
    * There are a million C syntax parsers. The one from K&R is actually all I need to
      detect this.
+5. Work on loading the embedded hooks.
