@@ -18,9 +18,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-import os
-import functools
-
 from .source_code import *
 from .copying import *
 from .version import *
@@ -34,13 +31,15 @@ def dot_c( runner ):
     return False, False
 
 def dot_e( runner ):
-    print( runner.compile_error.decode( 'utf-8' ), end='' )
+    if len( runner.compile_error ) > 0:
+        print( runner.compile_error.decode( 'utf-8' ), end='' )
     return False, False
 
 def dot_q( runner ):
     raise IGCCQuitException()
 
 def dot_l( runner ):
+    import os
     print()
     included = runner.get_user_includes_string()
     included = os.linesep.join( [s for s in included.splitlines() if s] )

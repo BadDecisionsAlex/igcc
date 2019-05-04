@@ -19,9 +19,6 @@
 # MA 02110-1301, USA.
 
 import subprocess
-from pygments import highlight
-from pygments.lexers.c_cpp import CLexer
-from pygments.formatters import Terminal256Formatter
 
 file_boilerplate = ( """\
 #include <stdlib.h>
@@ -53,6 +50,9 @@ igcc_closure = ( """\
 #  'paraiso-dark', 'lovelace', 'algol', 'algol_nu', 'arduino', 'rainbow_dash',
 #  'abap']
 def color_code( source_code ):
+    from pygments import highlight
+    from pygments.lexers.c_cpp import CLexer
+    from pygments.formatters import Terminal256Formatter
     return highlight(
       source_code, CLexer(),
       Terminal256Formatter( style='trac' )
