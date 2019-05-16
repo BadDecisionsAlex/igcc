@@ -24,13 +24,14 @@ file_boilerplate = ( """\
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#define IS_IGCC
 /* __IGCC_INCLUDES__ */
 /* __IGCC_FUNCTIONS__ */
 int
 main( void )
 {
-    /* __IGCC_COMMANDS__ */
-    return 0;
+  /* __IGCC_COMMANDS__ */
+  return( 0 );
 }
 """ )
 
@@ -39,6 +40,7 @@ igcc_closure = ( """\
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#define IS_IGCC
 /* __IGCC_INCLUDES__ */
 /* __IGCC_FUNCTIONS__ */
 /* __IGCC_COMMANDS__ */
@@ -50,51 +52,53 @@ igcc_closure = ( """\
 #  'paraiso-dark', 'lovelace', 'algol', 'algol_nu', 'arduino', 'rainbow_dash',
 #  'abap']
 def color_code( source_code ):
-    from pygments import highlight
-    from pygments.lexers.c_cpp import CLexer
-    from pygments.formatters import Terminal256Formatter
-    return highlight(
-      source_code, CLexer(),
-      Terminal256Formatter( style='trac' )
-      )
+  from pygments import highlight
+  from pygments.lexers.c_cpp import CLexer
+  from pygments.formatters import Terminal256Formatter
+  return highlight(
+    source_code, CLexer(),
+    Terminal256Formatter( style='trac' )
+    )
 
 
 # Fill your preferred formatting command here.
 def format_code( source_code ):
-    from distutils.spawn import find_executable
-    from getpass import getuser
-    from os import environ
-    from os.path import isfile
+  from distutils.spawn import find_executable
+  from getpass import getuser
+  from os import environ
+  from os.path import isfile
 
-    # Try to detect a suitable formatting program.
-    if find_executable('uncrustify') is not None:
-        fmt_cmd = ['uncrustify', '-l', 'c', '-q']
-        # Detect if the user has an uncrustify config
-        cfg_path = environ['HOME'] + '/.uncrustify.cfg'
-        if isfile( cfg_path ):
-            fmt_cmd += ['-c', cfg_path]
-    elif find_executable('indent') is not None:
-        fmt_cmd = ['indent']
-    else: # Give up
-        return source_code
+  # Try to detect a suitable formatting program.
+  if find_executable('uncrustify') is not None:
+      fmt_cmd = ['uncrustify', '-l', 'c', '-q']
+      # Detect if the user has an uncrustify config
+      cfg_path = environ['HOME'] + '/.uncrustify.cfg'
+      if isfile( cfg_path ):
+          fmt_cmd += ['-c', cfg_path]
+  elif find_executable('indent') is not None:
+      fmt_cmd = ['indent']
+  else: # Give up
+      return source_code
 
-    format_process = subprocess.Popen( fmt_cmd,
-      stdin = subprocess.PIPE, stdout = subprocess.PIPE )
+  format_process = subprocess.Popen( fmt_cmd,
+    stdin = subprocess.PIPE, stdout = subprocess.PIPE )
 
-    stdoutdata, stderrdata = format_process.communicate(
-      source_code.encode( 'utf-8') )
+  stdoutdata, stderrdata = format_process.communicate(
+    source_code.encode( 'utf-8') )
 
-    if stderrdata is not None:
-        return source_code
-    else:
-        return stdoutdata.decode( 'utf-8' )
+  if stderrdata is not None:
+      return source_code
+  else:
+      return stdoutdata.decode( 'utf-8' )
 
 
 def get_full_source( runner ):
-    with_replacements = ( file_boilerplate
-      .replace( "/* __IGCC_ENTRY__ */", igcc_closure )
-      .replace( "/* __IGCC_FUNCTIONS__ */", runner.get_user_functions_string() )
-      .replace( "/* __IGCC_COMMANDS__ */", runner.get_user_commands_string() )
-      .replace( "/* __IGCC_INCLUDES__ */", runner.get_user_includes_string() )
-      )
-    return format_code( with_replacements )
+  if runner.options.inputfile is None: boilerplate = file_boilerplate
+  else: boilerplate = open( runner.options.inputfile, "r" ).read()
+  with_replacements = ( boilerplate
+    .replace( "/* __IGCC_ENTRY__ */", igcc_closure )
+    .replace( "/* __IGCC_FUNCTIONS__ */", runner.get_user_functions_string() )
+    .replace( "/* __IGCC_COMMANDS__ */", runner.get_user_commands_string() )
+    .replace( "/* __IGCC_INCLUDES__ */", runner.get_user_includes_string() )
+    )
+  return format_code( with_replacements )
