@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 
 # igcc - a read-eval-print loop for C/C++ programmers
 #
