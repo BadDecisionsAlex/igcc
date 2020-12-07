@@ -39,9 +39,6 @@ from .dot_commands import *
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/config.yaml')
 config = argparse.Namespace(**yaml.safe_load(open(config_path)))
 
-history_file = '{}/.igcc_history'.format(os.environ['HOME'])
-history_size = 1000
-
 #---------------
 incl_re = re.compile( r"\s*#\s*include\s" )
 #---------------
@@ -295,16 +292,22 @@ def run( outputfile = sys.stdout, inputfile = None, print_welc = True,
             exefilename = get_temporary_file_name()
             ret = "normal"
             if print_welc and options.interactive: print_welcome()
+            
+            history_file=os.path.expandvars(config.history_file)
             if os.path.isfile(history_file):
                 readline.read_history_file(history_file)
-            else: open( history_file, 'a+' ).close()
+            else:
+                if not os.path.exists(os.path.dirname(history_file)):
+                    os.makedirs(os.path.dirname(history_file))
+                open( history_file, 'a+' ).close()
+            
             options.eval.append( "" )
             options.eval.reverse()
             options.inline_includes.reverse()
             Runner( options, options.inputfile, exefilename, config ).do_run()
         except IGCCQuitException:
-            readline.set_history_length( history_size )
-            readline.write_history_file( history_file )
+            readline.set_history_length(int(config.history_size))
+            readline.write_history_file(history_file)
             ret = "quit"
     finally:
         sys.stdout = real_sys_stdout
