@@ -20,7 +20,6 @@
 
 from .source_code import *
 from .copying import *
-from .version import *
 from colorama import Fore, Style
 
 class IGCCQuitException( BaseException ):
@@ -115,7 +114,7 @@ def dot_u( runner ):
     return False, False
 
 def dot_v( runner ):
-    print( f'igcc {VERSION}' )
+    print( f'igcc {runner.config.version}' )
     print( runner.version() )
     return False, False
 

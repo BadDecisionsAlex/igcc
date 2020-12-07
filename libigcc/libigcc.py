@@ -29,24 +29,15 @@ import tempfile
 from colorama import Fore, Style
 from optparse import OptionParser
 
+import yaml
+import argparse
+
 from .source_code import *
 from .dot_commands import *
-from .version import *
 
-# --------------
 
-# One day these will be in a config file
-
-prompt = Fore.YELLOW + "> " + Style.RESET_ALL
-
-compiler_command = ( "gcc", "-x", "c", "--std=gnu11", "-o", "$outfile", "-",
-  "$include_dirs", "$lib_dirs", "$libs" )
-
-compiler_version = ( "gcc", "--version" )
-
-include_dir_command = ( "-I$cmd", )
-lib_dir_command = ( "-L$cmd", )
-lib_command = ( "-l$cmd", )
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/config.yaml')
+config = argparse.Namespace(**yaml.safe_load(open(config_path)))
 
 history_file = '{}/.igcc_history'.format(os.environ['HOME'])
 history_size = 1000
@@ -83,14 +74,14 @@ def append_multiple( single_cmd, cmdlist, ret ):
                 ret.append( cmd_part.replace( "$cmd" , cmd ) )
 
 def get_compiler_command( options, outfilename ):
-    ret = []
-    for part in compiler_command:
+    ret = [config.compiler]
+    for part in config.compiler_args.split():
         if part == "$include_dirs":
-            append_multiple( include_dir_command, options.INCLUDE, ret )
+            append_multiple( config.include_dir_cmd, options.INCLUDE, ret )
         elif part == "$lib_dirs":
-            append_multiple( lib_dir_command, options.LIBDIR,ret )
+            append_multiple( config.lib_dir_cmd, options.LIBDIR,ret )
         elif part == "$libs":
-            append_multiple( lib_command, options.LIB, ret )
+            append_multiple( config.lib_cmd, options.LIB, ret )
         else:
             ret.append( part.replace( "$outfile", outfilename ) )
     return ret
@@ -117,12 +108,12 @@ def run_exe( exefilename ):
 
 def get_compiler_version():
     return subprocess.check_output(
-        compiler_version ).decode( 'utf-8' ).strip().split( '\n' )[0]
+        [config.compiler, config.compiler_version] ).decode( 'utf-8' ).strip().split( '\n' )[0]
 
 def print_welcome():
     print( f"""\
 
-{Fore.GREEN}IGCC {VERSION}{Style.RESET_ALL}{Style.BRIGHT}{Fore.BLACK}
+{Fore.GREEN}IGCC {config.version}{Style.RESET_ALL}{Style.BRIGHT}{Fore.BLACK}
 Released under GNU GPL version 2 or later, with NO WARRANTY.{Style.RESET_ALL}
 Type ':h' for help.
 """ )
@@ -158,7 +149,7 @@ class UserInput:
 
 class Runner:
 
-  def __init__( self, options, inputfile, exefilename ):
+  def __init__( self, options, inputfile, exefilename, config ):
       self.options = options
       self.inputfile = inputfile
       self.exefilename = exefilename
@@ -170,8 +161,10 @@ class Runner:
       self.error_chars_printed = 0
       self.paste = False
       self.functions_paste = False
+      self.config = config
 
   def do_run( self ):
+      prompt = Fore.YELLOW + self.config.prompt + Style.RESET_ALL
       read_line = create_read_line_function( None, prompt )
       subs_compiler_command = get_compiler_command(
           self.options, self.exefilename )
@@ -262,7 +255,7 @@ class Runner:
 
 
 def parse_args( argv ):
-    parser = OptionParser( version="igcc " + VERSION )
+    parser = OptionParser( version="igcc " + config.version )
     parser.add_option( "-I", "", dest="INCLUDE", action="append",
         help = "Add INCLUDE to the list of directories to " +
             "be searched for header files." )
@@ -308,7 +301,7 @@ def run( outputfile = sys.stdout, inputfile = None, print_welc = True,
             options.eval.append( "" )
             options.eval.reverse()
             options.inline_includes.reverse()
-            Runner( options, options.inputfile, exefilename ).do_run()
+            Runner( options, options.inputfile, exefilename, config ).do_run()
         except IGCCQuitException:
             readline.set_history_length( history_size )
             readline.write_history_file( history_file )
