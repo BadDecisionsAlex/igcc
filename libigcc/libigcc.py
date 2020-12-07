@@ -29,15 +29,10 @@ import tempfile
 from colorama import Fore, Style
 from optparse import OptionParser
 
-import yaml
-import argparse
+from .config import config
 
 from .source_code import *
 from .dot_commands import *
-
-
-config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/config.yaml')
-config = argparse.Namespace(**yaml.safe_load(open(config_path)))
 
 #---------------
 incl_re = re.compile( r"\s*#\s*include\s" )
